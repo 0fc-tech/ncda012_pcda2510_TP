@@ -26,12 +26,15 @@ class TweetActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const listButtons = ["Répondre", "Retweet", "Favoris","AI"];
     return Row(
       mainAxisAlignment: .spaceAround,
-      children: listButtons
-          .map((label) => TextButton(onPressed: () {}, child: Text(label)))
-          .toList(),
+      children:
+      [
+        IconButton(onPressed: () {}, icon: Icon(Icons.reply)),
+        IconButton(onPressed: () {}, icon: Icon(Icons.repeat)),
+        //IconButton(onPressed: () {}, icon: Icon(Icons.favorite_border))
+        IconButton(onPressed: () {}, icon: Icon(Icons.favorite, color: Colors.red,))
+      ]
     );
   }
 }
