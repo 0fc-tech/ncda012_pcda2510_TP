@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:tp/twitter/tweet.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -11,18 +15,40 @@ class HomePage extends StatelessWidget {
         title: Text('Twitter'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            NavBar(),
-            Column(children: [TweetContent(), TweetActions()]),
-          ],
-        ),
+      body: Column(
+        children: [
+          NavBar(),
+          FutureBuilder(
+              future: getAllTweets(),
+              builder: (context, snapshot) {
+                if(snapshot.hasData){
+                  final listTweets = snapshot.data!;
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: listTweets.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return TweetContent();
+                      },
+                    ),
+                  );
+                }
+                return Text("Les tweets arrivent");
+              },
+          )
+        ],
       ),
     );
   }
 }
-
+Future<List<Tweet>> getAllTweets() async{
+  final responseTweet = get(Uri.parse("https://raw.githubusercontent.com/Chocolaterie/EniWebService/main/api/tweets.json"));
+  String body = (await responseTweet).body;
+  List<dynamic> listMapTweet = jsonDecode(body) as List<dynamic>;
+  List<Tweet> listTweets = listMapTweet.map(
+          (map)=> Tweet.fromMap(map as Map<String,dynamic>)
+  ).toList();
+  return listTweets;
+}
 class TweetActions extends StatefulWidget {
   TweetActions({super.key});
 
