@@ -11,30 +11,60 @@ class HomePage extends StatelessWidget {
         title: Text('Twitter'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Column(
-        children: [
-          NavBar(),
-          Column(children: [TweetContent(), TweetActions()]),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            NavBar(),
+            LoginForm(),
+            Column(children: [TweetContent(), TweetActions()]),
+          ],
+        ),
       ),
     );
   }
 }
 
-class TweetActions extends StatelessWidget {
-  const TweetActions({super.key});
+class TweetActions extends StatefulWidget {
+  TweetActions({super.key});
+
+  @override
+  State<TweetActions> createState() => _TweetActionsState();
+}
+
+class _TweetActionsState extends State<TweetActions> {
+  bool isLiked = false;
+  int nbRetweets = 0;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: .spaceAround,
-      children:
-      [
+      children: [
+        Spacer(),
         IconButton(onPressed: () {}, icon: Icon(Icons.reply)),
-        IconButton(onPressed: () {}, icon: Icon(Icons.repeat)),
-        //IconButton(onPressed: () {}, icon: Icon(Icons.favorite_border))
-        IconButton(onPressed: () {}, icon: Icon(Icons.favorite, color: Colors.red,))
-      ]
+        Spacer(),
+        IconButton(
+          onPressed: () {
+            setState(() {
+              nbRetweets += 1;
+            });
+          },
+          icon: Icon(Icons.repeat, color: nbRetweets != 0 ? Colors.blue : null),
+        ),
+        Text("$nbRetweets"),
+        Spacer(),
+        IconButton(
+          onPressed: () {
+            setState(() {
+              isLiked = !isLiked;
+            });
+          },
+          icon: Icon(
+            isLiked ? Icons.favorite : Icons.favorite_border,
+            color: isLiked ? Colors.red : null,
+          ),
+        ),
+        Spacer(),
+      ],
     );
   }
 }
@@ -90,21 +120,100 @@ class NavBar extends StatelessWidget {
       color: Color(0xFF58B0F0),
       padding: EdgeInsets.symmetric(vertical: 25),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          TextButton(
+          SizedBox(width: 32,),
+          IconButton(
             onPressed: () {},
-            child: Text("Nouveau", style: textStyle),
+            icon: Icon(Icons.edit,color: Colors.white,),
           ),
+          Spacer(),
           TextButton(
             onPressed: () {},
             child: Text("Accueil", style: textStyle),
           ),
-          TextButton(
+          Spacer(),
+
+          IconButton(
             onPressed: () {},
-            child: Text("Rechercher", style: textStyle),
+            icon: Icon(Icons.search, color: Colors.white,),
           ),
+          SizedBox(width: 32,),
+
         ],
+      ),
+    );
+  }
+}
+
+class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _tecEmail = TextEditingController(text: "");
+  final _tecPwd = TextEditingController(text: "");
+  bool _rememberMe = false;
+  final _keyFormContact = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _keyFormContact,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text("Connexion à Twitter"),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: "Identifiant",
+              ),
+              keyboardType: TextInputType.emailAddress,
+              controller: _tecEmail,
+              validator: (value) {
+                if (value == null || value.isEmpty == true) {
+                  return "Renseignez votre e-mail";
+                } else if (value.contains("@")) {
+                  return null;
+                }
+                return "E-mail incorrect";
+              },
+            ),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: "Mot de passe",
+              ),
+              controller: _tecPwd,
+              validator: (value) {
+                if (value == null || value.isEmpty == true) {
+                  return "Renseignez votre mot passe";
+                }
+                return null;
+              },
+            ),
+            SwitchListTile(
+              value: _rememberMe,
+              onChanged: (newValue) {
+                setState(() {
+                  _rememberMe = newValue;
+                });
+              },
+              title: Text("Mémoriser mes informations"),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: FilledButton(
+                onPressed: () {
+                  _keyFormContact.currentState?.validate();
+                },
+                child: Text("Connexion"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
